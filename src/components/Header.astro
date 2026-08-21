@@ -1,13 +1,12 @@
 ---
-import { Image } from "astro:assets";
-import logo from "@/assets/img/TC.png";
+import logo from "@/assets/img/TC.svg";
 import "@/styles/header.css";
 ---
 
 <header>
     <nav>
         <a href="#home" class="logo">
-            <Image src={logo} alt="Logo" width="50" height="50" />
+            <img src={logo.src} alt="Logo" width="50" height="50" />
         </a>
         <div class="nav-links" id="navLinks">
             <a href="#home" class="active">Home</a>
