@@ -3,7 +3,11 @@ import { FlipWords } from "@/components/ui/flip-words";
 import "@/styles/global.css";
 
 export function FlipWordsComponent() {
-  const words = ["Software Engineer", "Blockchain Enthusiast", "AI Researcher"];
+  const words = [
+    "Mobile App Engineer",
+    "Blockchain Enthusiast",
+    "AI Researcher",
+  ];
 
   return (
     <div className="h-[4rem] flex items-center">

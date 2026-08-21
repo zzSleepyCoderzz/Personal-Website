@@ -20,9 +20,9 @@
  }
 
  .intro-text {
-     font-family: "Cabinet Grotesk", sans-serif;
+     font-family: var(--heading-font);
      font-size: 8rem;
-     font-weight: 900;
+     font-weight: 700;
      transform: translateY(100%);
      opacity: 1;
      animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards,
