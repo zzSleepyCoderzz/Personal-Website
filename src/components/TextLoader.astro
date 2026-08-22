@@ -2,27 +2,113 @@
 import "@/styles/textLoader.css";
 ---
 
-<div class="loading-container" id="loadingContainer">
-  <div class="intro-text-wrapper">
+<div class="loading-container" id="loadingContainer" aria-hidden="true">
+  <div class="intro-stage">
     <div class="intro-text">Introducing . . .</div>
+    <div class="intro-rule"></div>
+    <div class="intro-sheen"></div>
   </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  const COMPLETE_MS = 3400;
+  const TEARDOWN_MS = 3950;
+  const REDUCED_COMPLETE_MS = 1000;
+  const REDUCED_TEARDOWN_MS = 1600;
+
+  function splitIntroText() {
+    const el = document.querySelector(".intro-text");
+    if (!el || !el.textContent) return;
+
+    const words = el.textContent.split(" ");
+    const totalChars = words.join("").length;
+    const center = (totalChars - 1) / 2;
+
+    const frag = document.createDocumentFragment();
+    let charIndex = 0;
+
+    words.forEach((word, wordIdx) => {
+      const wordEl = document.createElement("span");
+      wordEl.className = "intro-word";
+
+      for (const ch of word) {
+        const mask = document.createElement("span");
+        mask.className = "char-mask";
+
+        const char = document.createElement("span");
+        char.className = "char";
+        char.textContent = ch;
+        char.style.setProperty("--i", String(charIndex));
+        char.style.setProperty("--o", String(Math.abs(charIndex - center)));
+        char.style.setProperty("--dy", charIndex % 2 === 0 ? "-1" : "1");
+
+        mask.appendChild(char);
+        wordEl.appendChild(mask);
+        charIndex += 1;
+      }
+
+      frag.appendChild(wordEl);
+
+      if (wordIdx < words.length - 1) {
+        const gap = document.createElement("span");
+        gap.className = "intro-gap";
+        frag.appendChild(gap);
+      }
+    });
+
+    el.textContent = "";
+    el.appendChild(frag);
+  }
+
+  function startTimeline() {
     const loadingContainer = document.getElementById("loadingContainer");
     const contentContainer = document.getElementById("js-content-container");
 
-    setTimeout(function () {
+    const finish = () => {
+      if (contentContainer) {
+        contentContainer.classList.add("visible");
+      }
+      document.dispatchEvent(new CustomEvent("loaderComplete"));
+    };
+
+    const teardown = () => {
       if (loadingContainer) {
         loadingContainer.style.display = "none";
       }
+    };
 
-      if (contentContainer) {
-        contentContainer.classList.add("visible");
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-        document.dispatchEvent(new CustomEvent("loaderComplete"));
-      }
-    }, 2500);
-  });
+    if (reducedMotion || !loadingContainer) {
+      loadingContainer?.classList.add("reduced");
+      setTimeout(finish, REDUCED_COMPLETE_MS);
+      setTimeout(teardown, REDUCED_TEARDOWN_MS);
+      return;
+    }
+
+    splitIntroText();
+    loadingContainer.classList.add("play");
+    setTimeout(finish, COMPLETE_MS);
+    setTimeout(teardown, TEARDOWN_MS);
+  }
+
+  function boot() {
+    const fontsReady =
+      typeof document.fonts !== "undefined"
+        ? document.fonts.ready
+        : Promise.resolve();
+
+    Promise.race([
+      fontsReady,
+      new Promise((resolve) => setTimeout(resolve, 700)),
+    ]).then(startTimeline);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
 </script>
