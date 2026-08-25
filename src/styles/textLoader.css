@@ -24,6 +24,14 @@
     font-weight: 700;
     line-height: 1.15;
     color: var(--text-color);
+    /* keep "Introducing . . ." on a single line */
+    white-space: nowrap;
+    /* hidden until the webfont is confirmed, preventing fallback flash */
+    visibility: hidden;
+}
+
+.intro-text.ready {
+    visibility: visible;
 }
 
 /* Word / character structure (built by JS) */
@@ -91,12 +99,10 @@
     width: 100%;
     height: 2px;
     margin-top: 0.35em;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--primary-color),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            var(--primary-color),
+            transparent);
     transform: scaleX(0);
     transform-origin: left center;
 }
@@ -126,14 +132,12 @@
     position: absolute;
     inset: -20% -30%;
     pointer-events: none;
-    background: linear-gradient(
-        115deg,
-        transparent 38%,
-        rgba(212, 175, 55, 0.3) 45%,
-        rgba(247, 214, 118, 0.75) 50%,
-        rgba(212, 175, 55, 0.3) 55%,
-        transparent 62%
-    );
+    background: linear-gradient(115deg,
+            transparent 38%,
+            rgba(212, 175, 55, 0.3) 45%,
+            rgba(247, 214, 118, 0.75) 50%,
+            rgba(212, 175, 55, 0.3) 55%,
+            transparent 62%);
     transform: translateX(-130%);
 }
 
@@ -187,12 +191,13 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
     .intro-text {
-        font-size: 4rem;
+        /* vw term keeps the full line inside narrow viewports (e.g. Honor X8 ~360px) */
+        font-size: min(4rem, 12vw);
     }
 }
 
 @media (max-width: 480px) {
     .intro-text {
-        font-size: 3rem;
+        font-size: min(3rem, 12vw);
     }
 }

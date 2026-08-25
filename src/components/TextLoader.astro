@@ -15,6 +15,8 @@ import "@/styles/textLoader.css";
   const TEARDOWN_MS = 3950;
   const REDUCED_COMPLETE_MS = 1000;
   const REDUCED_TEARDOWN_MS = 1600;
+  const FONT_WAIT_MS = 3000;
+  const FONT_POLL_MS = 100;
 
   function splitIntroText() {
     const el = document.querySelector(".intro-text");
@@ -63,6 +65,7 @@ import "@/styles/textLoader.css";
   function startTimeline() {
     const loadingContainer = document.getElementById("loadingContainer");
     const contentContainer = document.getElementById("js-content-container");
+    const introText = document.querySelector(".intro-text");
 
     const finish = () => {
       if (contentContainer) {
@@ -83,27 +86,36 @@ import "@/styles/textLoader.css";
 
     if (reducedMotion || !loadingContainer) {
       loadingContainer?.classList.add("reduced");
+      introText?.classList.add("ready");
       setTimeout(finish, REDUCED_COMPLETE_MS);
       setTimeout(teardown, REDUCED_TEARDOWN_MS);
       return;
     }
 
     splitIntroText();
+    introText?.classList.add("ready");
     loadingContainer.classList.add("play");
     setTimeout(finish, COMPLETE_MS);
     setTimeout(teardown, TEARDOWN_MS);
   }
 
-  function boot() {
-    const fontsReady =
-      typeof document.fonts !== "undefined"
-        ? document.fonts.ready
-        : Promise.resolve();
+  async function waitForClashDisplay() {
+    if (typeof document.fonts === "undefined") return;
 
-    Promise.race([
-      fontsReady,
-      new Promise((resolve) => setTimeout(resolve, 700)),
-    ]).then(startTimeline);
+    const deadline = performance.now() + FONT_WAIT_MS;
+    while (performance.now() < deadline) {
+      try {
+        const faces = await document.fonts.load('700 1rem "Clash Display"');
+        if (faces.length > 0) return;
+      } catch {
+        /* retry */
+      }
+      await new Promise((resolve) => setTimeout(resolve, FONT_POLL_MS));
+    }
+  }
+
+  function boot() {
+    waitForClashDisplay().then(startTimeline);
   }
 
   if (document.readyState === "loading") {
